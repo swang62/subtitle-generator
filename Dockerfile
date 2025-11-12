@@ -33,12 +33,12 @@ ENV LD_LIBRARY_PATH="${VIRTUAL_ENV}/lib/python${PYTHON_VERSION}/site-packages/nv
 
 # OS deps
 RUN --mount=type=cache,target=/var/cache/apt \
-    --mount=type=cache,target=/var/lib/apt/lists \
-    apt-get update && apt-get install -y --no-install-recommends curl ca-certificates
+  --mount=type=cache,target=/var/lib/apt/lists \
+  apt-get update && apt-get install -y --no-install-recommends curl ca-certificates
 
 # Python/uv deps
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
-RUN "uv install python ${PYTHON_VERSION}"
+RUN uv python install ${PYTHON_VERSION}
 
 ########################################
 # Build stages and preloading
@@ -47,17 +47,19 @@ FROM base AS build-deps
 
 COPY pyproject.toml uv.lock ./
 RUN --mount=type=cache,target=${UV_CACHE_DIR} \
-    uv sync --locked --no-install-project --no-dev
+  uv sync --locked --no-install-project --no-dev
 
 FROM build-deps AS build-project
+
 COPY . .
 RUN --mount=type=cache,target=${UV_CACHE_DIR} \
-    uv sync --locked --no-dev
+  uv sync --locked --no-dev
 
 FROM build-project AS build-models
+
 RUN uv run whisperx --version
 RUN --mount=type=cache,target=${CACHE_HOME} \
-    uv run ./preload-models.py
+  uv run ./preload-models.py
 
 ########################################
 # Setup for final build
