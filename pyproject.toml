@@ -1,0 +1,29 @@
+[project]
+name = "subtitle-generator"
+version = "0.1.0"
+description = "Automatically generate subtitles for video/audio files using whisperx"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+  "gradio>=5.49.1",
+  "hf-xet>=1.2.0",
+  "pre-commit>=4.4.0",
+  "python-dotenv>=1.2.1",
+  "torch==2.8.0",
+  "torchaudio==2.8.0",
+  "torchvision==0.23.0",
+  "whisperx>=3.7.4",
+]
+
+[tool.uv.sources]
+torch = { index = "pytorch" }
+torchvision = { index = "pytorch" }
+torchaudio = { index = "pytorch" }
+
+[[tool.uv.index]]
+name = "pytorch"
+url = "https://download.pytorch.org/whl/cu128"
+explicit = true
+
+[tool.ruff]
+target-version = "py313"

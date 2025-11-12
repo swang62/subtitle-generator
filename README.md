@@ -1,0 +1,70 @@
+# **Subtitle Generator**
+
+## Description
+
+A user-friendly GUI to automatically generate subtitles for any video/audio file on your local computer. It primarily uses [WhisperX](https://github.com/m-bain/whisperX), an advanced audio transcription system based on [Faster Whisper](https://github.com/SYSTRAN/faster-whisper) and supports both CPU and GPU (Nvidia CUDA) processing.
+
+![Screenshot](docs\screenshot.png)
+
+## Requirements
+
+- [UV package manager](https://docs.astral.sh/uv/getting-started/installation/)
+- [CUDA Toolkit 12.8.0](https://developer.nvidia.com/cuda-toolkit-archive) (If using an NVIDIA GPU)
+- For CPU-only mode, at least 8GB of RAM
+- For GPU acceleration, at least 8GB of VRAM, CUDA >= 12.8 (check your GPU stats with nvidia-smi)
+
+## Installation and usage
+
+You have two options, install locally or use docker (recommended). Installing with Docker has the advantage of persistence and customization with reverse proxies and volume mounts, etc.
+
+Either way, get started by first creating an .env file with the command `cp .env.sample .env`. Update the variable MEDIA_FOLDER inside the .env to wherever your media is located.
+
+- ### Local
+
+  ```bash
+  # Install all dependencies
+  uv sync --locked
+
+  # Start local server at http://localhost:7860
+  uv run app.py
+  ```
+
+- ### Docker
+
+  Make sure you are using the WSL2 backend if on Windows.
+
+  ```bash
+  # GPU-accelerated
+  docker compose up -d
+
+  # CPU-only mode
+  docker compose -f compose.cpu.yaml up -d
+  ```
+
+  Now go relax and make a coffee, come back in 30min :)
+
+Using the GUI (accessible at <http://localhost:7860>) is pretty self-explanatory. Pick a video/audio file to generate subtitles for. The subtitles file will be created in the same folder as the video you picked, with the same filename so all media players and backends like Jellyfin/Emby/Plex will detect it automatically.
+
+## Development
+
+If you would like to help contribute to this repo, or simply want to customize the code for your own purposes, use the local setup above and make sure your code editor and/or terminal has the virtual environment activated. But instead of running `uv run app.py`, use the command `uv run gradio app.py`. This will enable hot-reloading for easier local development. All changes will be instantly refreshed in the browser. Have fun!
+
+> [!NOTE]Tips
+> If you would like to enforce linting and formatting rules while developing, install `uv tool install ruff@latest` and then run `pre-commit install` to install git hooks.
+
+---
+
+> [!NOTE]Caching
+> _If using Docker, use `docker compose up -d --build` to force docker to rebuild the image, otherwise it will always use the old image. If you are still having problems, use the argument `--no-cache` to bypass the cache completly. Also, modify preload-models.py to add/remove caching of models you use frequently._
+
+## Acknowledgements
+
+Huge thanks to the following open-source projects. Much inspiration and code snippets have been borrowed from them. No AI was used or harmed in the making of this project.
+
+- [WhisperX](https://github.com/m-bain/whisperX)
+- [Kit-WhisperX](https://github.com/rgcodeai/Kit-Whisperx)
+- [docker-whisperX](https://github.com/jim60105/docker-whisperX)
+
+## LICENSE
+
+WhisperX is distributed under [BSD-2](https://github.com/m-bain/whisperX/blob/main/LICENSE). All files in this repository are licensed under [MIT](LICENSE).

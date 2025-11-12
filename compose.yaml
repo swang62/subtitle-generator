@@ -1,0 +1,22 @@
+services:
+  subtitles:
+    container_name: subtitles
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: swang62/subtitles
+    environment:
+      - MEDIA_FOLDER=/media
+    ports:
+      - 7860:7860
+    volumes:
+      - ${MEDIA_FOLDER}:/media:rw
+      - ./.cache:/.cache
+      - ./.config:/.config
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]

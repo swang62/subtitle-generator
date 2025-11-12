@@ -1,0 +1,11 @@
+# Folders
+**/__pycache__/*
+.vscode/*
+.venv/*
+.cache/*
+.config/*
+
+# Files
+.DS_Store
+*.pyc
+.env
