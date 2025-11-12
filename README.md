@@ -49,13 +49,12 @@ Using the GUI (accessible at <http://localhost:7860>) is pretty self-explanatory
 
 If you would like to help contribute to this repo, or simply want to customize the code for your own purposes, use the local setup above and make sure your code editor and/or terminal has the virtual environment activated. But instead of running `uv run app.py`, use the command `uv run gradio app.py`. This will enable hot-reloading for easier local development. All changes will be instantly refreshed in the browser. Have fun!
 
-> [!NOTE]Tips
+> [!NOTE]
 > If you would like to enforce linting and formatting rules while developing, install `uv tool install ruff@latest` and then run `pre-commit install` to install git hooks.
-
----
-
-> [!NOTE]Caching
-> _If using Docker, use `docker compose up -d --build` to force docker to rebuild the image, otherwise it will always use the old image. If you are still having problems, use the argument `--no-cache` to bypass the cache completly. Also, modify preload-models.py to add/remove caching of models you use frequently._
+>
+> If using Docker, use `docker compose up -d --build` to force docker to rebuild the image, otherwise it will always use the old image.
+> If you are still having problems, use the argument `--no-cache` to bypass the cache completely.
+> Also, edit preload-models.py to add/remove caching of models you use frequently.
 
 ## Acknowledgements
 
