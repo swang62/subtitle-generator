@@ -4,7 +4,7 @@
 
 A user-friendly GUI to automatically generate subtitles for any video/audio file on your local computer. It primarily uses [WhisperX](https://github.com/m-bain/whisperX), an advanced audio transcription system based on [Faster Whisper](https://github.com/SYSTRAN/faster-whisper) and supports both CPU and GPU (Nvidia CUDA) processing.
 
-![Screenshot](docs\screenshot.png)
+![Screenshot](docs/screenshot.png)
 
 ## Requirements
 
