@@ -5,6 +5,7 @@ description = "Automatically generate subtitles for video/audio files using whis
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
+  "ffmpeg-python>=0.2.0",
   "gradio>=5.49.1",
   "hf-xet>=1.2.0",
   "python-dotenv>=1.2.1",

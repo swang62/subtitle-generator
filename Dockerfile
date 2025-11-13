@@ -27,8 +27,12 @@ ENV PATH="${VIRTUAL_ENV}/bin:${PATH}"
 ENV PYTHONPATH="${VIRTUAL_ENV}/lib/python${PYTHON_VERSION}/site-packages"
 ENV LD_LIBRARY_PATH="${VIRTUAL_ENV}/lib/python${PYTHON_VERSION}/site-packages/nvidia/cudnn/lib:${LD_LIBRARY_PATH}"
 
-# Python/uv deps
+# Core deps
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
+
+RUN --mount=type=cache,target=/var/cache/apt \
+  --mount=type=cache,target=/var/lib/apt/lists \
+  apt-get update && apt-get install -y ffmpeg
 
 RUN --mount=type=cache,target=${UV_CACHE_DIR} \
   uv python install ${PYTHON_VERSION}

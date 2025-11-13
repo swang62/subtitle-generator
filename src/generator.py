@@ -1,7 +1,8 @@
+import os
 import whisperx
 import gradio as gr
 from src.model_manager import manager
-from src.utils import save_to_srt
+from src.utils import format_to_minutes, save_to_srt
 from datetime import datetime
 
 
@@ -15,8 +16,8 @@ def generate_subtitles(
     chunk_size: int,
     progress,
 ):
-    file_path = output_dir + "\\" + file_name
     start = datetime.now()
+    file_path = os.path.join(output_dir, file_name)
 
     # Config
     options = {}
@@ -33,7 +34,6 @@ def generate_subtitles(
         print("Loading in audio...")
         audio = whisperx.load_audio(file_path)
         progress.update(1)  # 2
-        progress
 
         # Transcribe or translate
         print("Transcribing...")
@@ -67,7 +67,8 @@ def generate_subtitles(
 
         print("Done.")
 
-        total_time = f"[Finished in {(datetime.now() - start).total_seconds():.0f}s.]"
+        elapsed = (datetime.now() - start).total_seconds()
+        total_time = f"[Finished in {format_to_minutes(elapsed)}]"
 
         return total_time, output_data, output_path
 

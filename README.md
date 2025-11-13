@@ -41,7 +41,7 @@ Either way, get started by first creating an .env file with the command `cp .env
   docker compose -f compose.cpu.yaml up -d
   ```
 
-  Now go relax and make a coffee, come back in 30min :)
+  Now go relax and make a coffee, come back in 15min :)
 
 Using the GUI (accessible at <http://localhost:7860>) is pretty self-explanatory. Pick a video/audio file to generate subtitles for. The subtitles file will be created in the same folder as the video you picked, with the same filename so all media players and backends like Jellyfin/Emby/Plex will detect it automatically.
 

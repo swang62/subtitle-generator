@@ -1,8 +1,9 @@
 # Constants
+
 MODELS = {
     "base": "default (fastest, least accurate)",
     "medium": "medium (faster, okay accuracy)",
-    "large-v3-turbo": "large-v3 (slower, good accuracy)",
+    "large-v3-turbo": "large-turbo (slower, good accuracy)",
     "large-v2": "large-v2 (slowest, most accurate)",
 }
 SUPPORTED_EXTENSIONS = (

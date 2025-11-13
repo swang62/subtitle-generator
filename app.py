@@ -1,3 +1,4 @@
+import os
 import gradio as gr
 import torch
 from tqdm import tqdm
@@ -118,13 +119,12 @@ with gr.Blocks(theme=gr.themes.Ocean(), css=css, title="Subtitle Generator") as 
                 )
 
     # Handlers
-    def update_on_file_select(file: str):
-        if not file:
+    def update_on_file_select(file_path: str):
+        if not file_path or os.path.isfile(file_path):
             return "", ""
-        path = file.split("\\")
-        filename = path[-1]
-        dirpath = "\\".join(path[:-1])
-        return filename, dirpath
+
+        dir_path, file_name = os.path.split(file_path)
+        return file_name, dir_path
 
     file_input.change(
         fn=update_on_file_select,
@@ -133,9 +133,10 @@ with gr.Blocks(theme=gr.themes.Ocean(), css=css, title="Subtitle Generator") as 
     )
 
     def validate_input(file_name, output_dir, *args) -> list[dict]:
+        file_path = os.path.join(output_dir, file_name)
         return [
             gr.validate(
-                is_valid_file(output_dir + "\\" + file_name),
+                is_valid_file(file_path),
                 "Invalid file.",
             )
         ] + [gr.validate(True, "")] * 4
@@ -155,7 +156,7 @@ with gr.Blocks(theme=gr.themes.Ocean(), css=css, title="Subtitle Generator") as 
     )
 
     transcribe_button.click(
-        fn=lambda lang: gr.update(value=f"[Transcribing to language:{lang} ...]"),
+        fn=lambda lang: gr.update(value=f"[Transcribing to language: {lang} ...]"),
         inputs=[language_dropdown],
         outputs=[status],
     )
