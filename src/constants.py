@@ -1,10 +1,10 @@
 # Constants
+
 MODELS = {
-    "base": "default",
-    "small": "small",
-    "medium": "medium",
-    "large-v2": "large-v2 (slower, more accurate)",
-    "large-v3-turbo": "large-v3 (faster, less accurate)",
+    "base": "default (fastest, least accurate)",
+    "medium": "medium (faster, okay accuracy)",
+    "large-v3-turbo": "large-turbo (slower, good accuracy)",
+    "large-v2": "large-v2 (slowest, most accurate)",
 }
 SUPPORTED_EXTENSIONS = (
     ".mp3",

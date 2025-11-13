@@ -1,11 +1,15 @@
 # Folders
 **/__pycache__/*
-.vscode/*
-.venv/*
-.cache/*
-.config/*
+.vscode/
+.venv/
+.ruff_cache/
+
+models/*
 
 # Files
 .DS_Store
 *.pyc
 .env
+
+# Keep
+!_MODELS_CACHE_
