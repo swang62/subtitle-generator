@@ -1,22 +1,22 @@
 services:
-  subtitles:
-    container_name: subtitles
+  subtitle-generator:
+    container_name: subtitle-generator
     build:
       context: .
       dockerfile: Dockerfile
-    image: swang62/subtitles
+    image: swang62/subtitle-generator
     environment:
       - MEDIA_FOLDER=/media
     ports:
       - 7860:7860
+    tty: true
+    restart: unless-stopped
     volumes:
       - ${MEDIA_FOLDER}:/media:rw
-      - ./.cache:/.cache
-      - ./.config:/.config
+      - ./models:/models
     deploy:
       resources:
         reservations:
           devices:
             - driver: nvidia
-              count: 1
               capabilities: [gpu]

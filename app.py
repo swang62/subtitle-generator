@@ -6,7 +6,12 @@ from src.constants import LANGUAGE_OPTIONS, MODELS
 from src.generator import generate_subtitles
 from src.utils import is_valid_file
 
-with gr.Blocks(theme=gr.themes.Ocean()) as demo:  # type: ignore
+device = "cuda" if torch.cuda.is_available() else "cpu"
+css = """
+.status textarea {text-align: center; display: block}
+"""
+
+with gr.Blocks(theme=gr.themes.Ocean(), css=css, title="Subtitle Generator") as demo:  # type: ignore
     # Header
     with gr.Row(equal_height=True):
         with gr.Column():
@@ -60,10 +65,16 @@ with gr.Blocks(theme=gr.themes.Ocean()) as demo:  # type: ignore
                         label="Chunk size",
                         value=30,
                     )
+
             transcribe_button = gr.Button("👉 Transcribe", variant="primary")
 
             gr.Markdown("### 📝 Results")
             with gr.Group():
+                status = gr.Textbox(
+                    label="Status log",
+                    value=f"[Backend: {device.upper()}]",
+                    elem_classes="status",
+                )
                 output_content = gr.TextArea(
                     label="Subtitles",
                     interactive=False,
@@ -80,7 +91,7 @@ with gr.Blocks(theme=gr.themes.Ocean()) as demo:  # type: ignore
         model_name,
         chunk_size,
         progress=gr.Progress(track_tqdm=True),
-    ):
+    ) -> tuple:
         with tqdm(total=5) as pbar:
             try:
                 device = "cuda" if torch.cuda.is_available() else "cpu"
@@ -93,13 +104,18 @@ with gr.Blocks(theme=gr.themes.Ocean()) as demo:  # type: ignore
                     "chunk_size": int(chunk_size),
                 }
                 print(settings)
+                pbar.set_description("Processing...")
 
-                content, path = generate_subtitles(progress=pbar, **settings)
-                return content, path
+                status, content, path = generate_subtitles(progress=pbar, **settings)
+                return status, content, path
 
             except Exception as e:
                 error_msg = f"Error: {str(e)}"
-                return [gr.update(value=error_msg)] * 2
+                return (
+                    gr.update(value="Failed!"),
+                    gr.update(value=error_msg),
+                    gr.update(value=error_msg),
+                )
 
     # Handlers
     def update_on_file_select(file: str):
@@ -127,6 +143,7 @@ with gr.Blocks(theme=gr.themes.Ocean()) as demo:  # type: ignore
     transcribe_button.click(
         fn=start_process,
         validator=validate_input,
+        show_progress_on=output_content,
         inputs=[
             file_selected,
             dir_selected,
@@ -134,7 +151,13 @@ with gr.Blocks(theme=gr.themes.Ocean()) as demo:  # type: ignore
             model_dropdown,
             chunk_slider,
         ],
-        outputs=[output_content, output_path],
+        outputs=[status, output_content, output_path],
+    )
+
+    transcribe_button.click(
+        fn=lambda lang: gr.update(value=f"[Transcribing to language:{lang} ...]"),
+        inputs=[language_dropdown],
+        outputs=[status],
     )
 
 if __name__ == "__main__":

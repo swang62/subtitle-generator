@@ -34,7 +34,7 @@ Either way, get started by first creating an .env file with the command `cp .env
   Make sure you are using the WSL2 backend if on Windows.
 
   ```bash
-  # GPU-accelerated
+  # GPU-mode with CUDA
   docker compose up -d
 
   # CPU-only mode
@@ -45,15 +45,20 @@ Either way, get started by first creating an .env file with the command `cp .env
 
 Using the GUI (accessible at <http://localhost:7860>) is pretty self-explanatory. Pick a video/audio file to generate subtitles for. The subtitles file will be created in the same folder as the video you picked, with the same filename so all media players and backends like Jellyfin/Emby/Plex will detect it automatically.
 
+> [!TIP]
+> Processing a video for the first time will take significantly longer than usual, since the app needs to download all the models for pytorch/huggingface.
+> To speed up docker images, if you have already used whisper in the past, or setup the project locally, you can copy over the model files from your local cache folders into the respective `./models/torch` or `./models/huggingface` folders.
+> These folders will be located at `$TORCH_HOME` and `$HF_HOME`.
+
 ## Development
 
 If you would like to help contribute to this repo, or simply want to customize the code for your own purposes, use the local setup above and make sure your code editor and/or terminal has the virtual environment activated. But instead of running `uv run app.py`, use the command `uv run gradio app.py`. This will enable hot-reloading for easier local development. All changes will be instantly refreshed in the browser. Have fun!
 
 > [!NOTE]
-> If you would like to enforce linting and formatting rules while developing, install `uv tool install ruff@latest` and then run `pre-commit install` to install git hooks.
+> If you would like to enforce linting and formatting rules while developing, run `pre-commit install` to install git hooks.
 >
 > If using Docker, use `docker compose up -d --build` to force docker to rebuild the image, otherwise it will always use the old image.
-> If you are still having problems, use the argument `--no-cache` to bypass the cache completely.
+> If you are still having problems, use the `docker compose build --no-cache` to bypass the cache completely.
 > Also, edit preload-models.py to add/remove caching of models you use frequently.
 
 ## Acknowledgements

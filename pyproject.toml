@@ -7,7 +7,6 @@ requires-python = ">=3.13"
 dependencies = [
   "gradio>=5.49.1",
   "hf-xet>=1.2.0",
-  "pre-commit>=4.4.0",
   "python-dotenv>=1.2.1",
   "torch==2.8.0",
   "torchaudio==2.8.0",
@@ -27,3 +26,8 @@ explicit = true
 
 [tool.ruff]
 target-version = "py313"
+
+[dependency-groups]
+dev = [
+    "pre-commit>=4.4.0",
+]

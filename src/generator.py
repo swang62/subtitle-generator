@@ -2,6 +2,7 @@ import whisperx
 import gradio as gr
 from src.model_manager import manager
 from src.utils import save_to_srt
+from datetime import datetime
 
 
 # Main function to transcribe/translate audio
@@ -15,6 +16,7 @@ def generate_subtitles(
     progress,
 ):
     file_path = output_dir + "\\" + file_name
+    start = datetime.now()
 
     # Config
     options = {}
@@ -31,6 +33,7 @@ def generate_subtitles(
         print("Loading in audio...")
         audio = whisperx.load_audio(file_path)
         progress.update(1)  # 2
+        progress
 
         # Transcribe or translate
         print("Transcribing...")
@@ -61,9 +64,12 @@ def generate_subtitles(
 
         with open(output_path, "r", encoding="utf-8") as file:
             output_data = file.read()
+
         print("Done.")
 
-        return output_data, output_path
+        total_time = f"[Finished in {(datetime.now() - start).total_seconds():.0f}s.]"
+
+        return total_time, output_data, output_path
 
     except Exception as e:
         error_message = f"Error during transcription: {str(e)}"
