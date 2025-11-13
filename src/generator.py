@@ -73,6 +73,4 @@ def generate_subtitles(
         return total_time, output_data, output_path
 
     except Exception as e:
-        error_message = f"Error during transcription: {str(e)}"
-        print(error_message)
-        raise gr.Error(error_message)
+        raise gr.Error(str(e))

@@ -56,7 +56,7 @@ RUN --mount=type=cache,target=${UV_CACHE_DIR} \
 ########################################
 # Setup for final build
 ########################################
-FROM base AS production
+FROM base AS final
 
 ENV GRADIO_SERVER_NAME="0.0.0.0"
 ENV MEDIA_FOLDER="/media"

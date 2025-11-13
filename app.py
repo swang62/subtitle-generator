@@ -5,11 +5,16 @@ from tqdm import tqdm
 from src.config import MEDIA_FOLDER
 from src.constants import LANGUAGE_OPTIONS, MODELS
 from src.generator import generate_subtitles
-from src.utils import is_valid_file
+from src.utils import is_valid_multimedia_file
+from time import sleep
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
 css = """
-.status textarea {text-align: center; display: block}
+.status textarea 
+{
+    text-align: center; 
+    display: block
+}
 """
 
 with gr.Blocks(theme=gr.themes.Ocean(), css=css, title="Subtitle Generator") as demo:  # type: ignore
@@ -71,16 +76,16 @@ with gr.Blocks(theme=gr.themes.Ocean(), css=css, title="Subtitle Generator") as 
 
             gr.Markdown("### 📝 Results")
             with gr.Group():
-                status = gr.Textbox(
-                    label="Status log",
-                    value=f"[Backend: {device.upper()}]",
-                    elem_classes="status",
-                )
                 output_content = gr.TextArea(
                     label="Subtitles",
                     interactive=False,
                     show_copy_button=True,
                     visible=True,
+                )
+                status = gr.Textbox(
+                    show_label=False,
+                    value=f"[Engine: {device.upper()}]",
+                    elem_classes="status",
                 )
                 output_path = gr.DownloadButton("Download")
 
@@ -95,6 +100,10 @@ with gr.Blocks(theme=gr.themes.Ocean(), css=css, title="Subtitle Generator") as 
     ) -> tuple:
         with tqdm(total=5) as pbar:
             try:
+                if not is_valid_multimedia_file(output_dir, file_name):
+                    sleep(0.2)
+                    raise ValueError("Please select a valid audio/video file.")
+
                 device = "cuda" if torch.cuda.is_available() else "cpu"
                 settings = {
                     "file_name": file_name,
@@ -112,15 +121,17 @@ with gr.Blocks(theme=gr.themes.Ocean(), css=css, title="Subtitle Generator") as 
 
             except Exception as e:
                 error_msg = f"Error: {str(e)}"
+                print(error_msg)
                 return (
                     gr.update(value="Failed!"),
-                    gr.update(value=error_msg),
-                    gr.update(value=error_msg),
+                    gr.Error(error_msg),
+                    None,
                 )
 
     # Handlers
     def update_on_file_select(file_path: str):
-        if not file_path or os.path.isfile(file_path):
+        print(f"Selected file: {file_path}")
+        if not file_path:
             return "", ""
 
         dir_path, file_name = os.path.split(file_path)
@@ -132,18 +143,8 @@ with gr.Blocks(theme=gr.themes.Ocean(), css=css, title="Subtitle Generator") as 
         outputs=[file_selected, dir_selected],
     )
 
-    def validate_input(file_name, output_dir, *args) -> list[dict]:
-        file_path = os.path.join(output_dir, file_name)
-        return [
-            gr.validate(
-                is_valid_file(file_path),
-                "Invalid file.",
-            )
-        ] + [gr.validate(True, "")] * 4
-
     transcribe_button.click(
         fn=start_process,
-        validator=validate_input,
         show_progress_on=output_content,
         inputs=[
             file_selected,

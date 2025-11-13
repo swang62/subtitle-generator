@@ -5,9 +5,10 @@ import re
 from src.constants import SUPPORTED_EXTENSIONS
 
 
-def is_valid_file(file_path: str):
+def is_valid_multimedia_file(output_dir: str, file_name: str):
     """Checks if the file path corresponds to a real video/audio file"""
 
+    file_path = os.path.join(output_dir, file_name)
     normalized_path = os.path.normpath(file_path)
     mime_type, _ = mimetypes.guess_type(normalized_path)
     is_supported_mime = mime_type and (
