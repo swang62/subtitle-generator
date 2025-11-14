@@ -1,6 +1,7 @@
 import os
 import mimetypes
 import re
+from typing import Any
 
 from src.constants import SUPPORTED_EXTENSIONS
 
@@ -18,33 +19,25 @@ def is_valid_multimedia_file(output_dir: str, file_name: str):
     return is_supported_mime or normalized_path.lower().endswith(SUPPORTED_EXTENSIONS)
 
 
-def format_to_minutes(elapsed: float):
-    minutes = int(elapsed // 60)
-    seconds = int(elapsed % 60)
-
-    # 0m 15s
-    return f"{minutes}m {seconds}s"
-
-
-def format_time_for_txt(elapsed: float):
-    hours = int(elapsed // 3600)
-    minutes = int((elapsed % 3600) // 60)
-    seconds = int(elapsed % 60)
+def format_time_for_txt(duration: float):
+    hours = int(duration // 3600)
+    minutes = int((duration % 3600) // 60)
+    seconds = int(duration % 60)
 
     # 00:00:15
     return f"{hours:02d}:{minutes:02d}:{seconds:02d}"
 
 
-def format_time_for_srt(time_in_seconds):
-    hours = int(time_in_seconds // 3600)
-    minutes = int((time_in_seconds % 3600) // 60)
-    seconds = int(time_in_seconds % 60)
-    milliseconds = int((time_in_seconds - int(time_in_seconds)) * 1000)
+def format_time_for_srt(duration: float):
+    hours = int(duration // 3600)
+    minutes = int((duration % 3600) // 60)
+    seconds = int(duration % 60)
+    milliseconds = int((duration - int(duration)) * 1000)
 
     return f"{hours:02}:{minutes:02}:{seconds:02},{milliseconds:03}"
 
 
-def save_to_srt(segments, file_name: str, output_dir: str):
+def save_to_srt(segments: list[dict[str, Any]], file_name: str, output_dir: str):
     """Formats and saves SRT with same name as the original video"""
 
     srt_file_name = re.sub(r"\.\w+$", ".srt", file_name)
@@ -61,7 +54,7 @@ def save_to_srt(segments, file_name: str, output_dir: str):
     return file_path
 
 
-def save_to_txt(segments, file_name: str, output_dir: str):
+def save_to_txt(segments: list[dict[str, Any]], file_name: str, output_dir: str):
     """Formats and saves TXT with same name as the original video"""
 
     srt_file_name = re.sub(r"\.\w+$", ".txt", file_name)

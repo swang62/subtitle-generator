@@ -1,5 +1,5 @@
 import whisperx
-
+from whisperx.diarize import DiarizationPipeline
 from src.config import HF_TOKEN
 
 
@@ -68,12 +68,24 @@ class ModelCache:
             or device != self._current_device_diarize
         ):
             print(f"Loading diarize model on device:{device}")
-            self._current_diarize_model = whisperx.diarize.DiarizationPipeline(
-                use_auth_token=HF_TOKEN, device=device
-            )  # type: ignore
-            self._current_device_diarize = device
+            try:
+                self._current_diarize_model = DiarizationPipeline(
+                    model_name="pyannote/speaker-diarization-3.1",
+                    use_auth_token=HF_TOKEN,
+                    device=device,
+                )
+                self._current_diarize_model.model.embedding_batch_size = 8
+                self._current_diarize_model.model.segmentation_batch_size = 8
+                self._current_device_diarize = device
+            except Exception as e:
+                print(str(e))
+                raise RuntimeError(
+                    "Make sure your HF_TOKEN is correct and you've accepted "
+                    "the terms at: https://huggingface.co/pyannote/speaker-diarization-3.1 "
+                    "and https://huggingface.co/pyannote/segmentation-3.0"
+                )
 
-        return self._current_align_model, self._current_align_metadata
+        return self._current_diarize_model
 
 
 cache = ModelCache()

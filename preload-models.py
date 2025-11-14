@@ -1,15 +1,16 @@
 import torchaudio
 import faster_whisper
 import torch
-from transformers import Wav2Vec2ForCTC, Wav2Vec2Processor
 
+from src.config import HF_TOKEN
 from src.constants import DEFAULT_ALIGN_MODELS_TORCH, DEFAULT_ALIGN_MODELS_HF
 
 # Reference
 # https://github.com/m-bain/whisperX/blob/v3.1.1/whisperx/alignment.py#L21
 
 # See constants.py for available models/languages
-models = ["large-v3-turbo"]
+device = "cuda"
+models = ["base", "large-v3-turbo"]
 alignment_languages = ["en"]
 
 for model in models:
@@ -30,22 +31,32 @@ for language in alignment_languages:
     if model_name in torchaudio.pipelines.__all__:
         bundle = torchaudio.pipelines.__dict__[model_name]
         align_model = bundle.get_model()
-        labels = bundle.get_labels()
     else:
+        from transformers import Wav2Vec2ForCTC, Wav2Vec2Processor
+
         try:
             processor = Wav2Vec2Processor.from_pretrained(model_name)
             align_model = Wav2Vec2ForCTC.from_pretrained(model_name)
         except Exception as e:
             print(str(e))
             raise ValueError(f"Failed to load {model_name}")
-        labels = processor.tokenizer.get_vocab()  # type: ignore
 
-print("Loading voice activity detector...")
-torch.hub.load(
-    repo_or_dir="snakers4/silero-vad",
-    model="silero_vad",
-    force_reload=False,
-    onnx=False,
-    trust_repo=True,
-)
+if HF_TOKEN != "":
+    print("Loading voice activity detector...")
+    torch.hub.load(
+        repo_or_dir="snakers4/silero-vad",
+        model="silero_vad",
+        force_reload=False,
+        onnx=False,
+        trust_repo=True,
+    )
+    from whisperx.diarize import DiarizationPipeline
+
+    print("Loading pyannote diarization...")
+    diarize_model = DiarizationPipeline(
+        model_name="pyannote/speaker-diarization-3.1",
+        use_auth_token=HF_TOKEN,
+        device=device,
+    )
+
 print("Done.")

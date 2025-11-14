@@ -2,7 +2,7 @@ import os
 import whisperx
 import gradio as gr
 from src.model_manager import cache
-from src.utils import format_to_minutes, save_to_srt, save_to_txt
+from src.utils import save_to_srt, save_to_txt
 from datetime import datetime
 
 
@@ -22,7 +22,7 @@ def generate_subtitles(
 
     # Config
     options = {}
-    if language:
+    if language is not None:
         options["language"] = language
     options["chunk_size"] = chunk_size
 
@@ -50,9 +50,8 @@ def generate_subtitles(
         input_language = str(detected_language or language)
         output_language = language or input_language
         if input_language == output_language:
-            print("Aligning segments...")
-
             align_model, align_metadata = cache.load_align_model(input_language, device)
+            print("Aligning segments...")
             output = whisperx.align(
                 output["segments"], align_model, align_metadata, audio, device
             )
@@ -63,26 +62,35 @@ def generate_subtitles(
         if mode == "generate":
             output_path = save_to_srt(output["segments"], file_name, output_dir)
         else:
+            # Label speakers for meeting transcribing
+            diarize_model = cache.load_diarize_model(device)
             print("Assigning speaker labels...")
-            diarize_model = model.load_diarize(device)
             diarize_segments = diarize_model(audio)
             output = whisperx.assign_word_speakers(diarize_segments, output)
             output_path = save_to_txt(output["segments"], file_name, output_dir)
         progress.update(1)  # 5
 
-        status, output_data = test_and_finalize(output_path, start)
+        # Output data
+        with open(output_path, "r", encoding="utf-8") as file:
+            output_data = file.read()
+
+        # Detect unique speakers
+        unique_speakers = [
+            segment["speaker"] for segment in output["segments"] if "speaker" in segment
+        ]
+        unique_speakers = ",".join(list(set(unique_speakers)))
+
+        # Time elapsed
+        duration = (datetime.now() - start).total_seconds()
+
         print("Done.")
 
-        return status, output_data
+        return {
+            "duration": duration,
+            "output_data": output_data,
+            "output_path": output_path,
+            "unique_speakers": unique_speakers,
+        }
 
     except Exception as e:
         raise gr.Error(str(e))
-
-
-def test_and_finalize(output_path: str, start: datetime):
-    with open(output_path, "r", encoding="utf-8") as file:
-        output_data = file.read()
-    elapsed = (datetime.now() - start).total_seconds()
-    status = f"Finished in {format_to_minutes(elapsed)}\nOutput saved to {output_path}"
-
-    return status, output_data

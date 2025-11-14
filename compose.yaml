@@ -7,6 +7,7 @@ services:
     image: swang62/subtitle-generator
     environment:
       - MEDIA_FOLDER=/media
+      - HF_TOKEN=${HF_TOKEN}
     ports:
       - 7860:7860
     tty: true
