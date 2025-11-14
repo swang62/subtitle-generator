@@ -1,7 +1,7 @@
 import os
 import whisperx
 import gradio as gr
-from src.model_manager import manager
+from src.model_manager import cache
 from src.utils import format_to_minutes, save_to_srt
 from datetime import datetime
 
@@ -14,6 +14,7 @@ def generate_subtitles(
     model_name: str,
     device: str,
     chunk_size: int,
+    mode: str,
     progress,
 ):
     start = datetime.now()
@@ -27,12 +28,12 @@ def generate_subtitles(
 
     try:
         # Load whisper model
-        model = manager.load_model(model_name, device)
+        model = cache.load_model(model_name, device)
         progress.update(1)  # 1
 
         # Load audio file
         print("Loading in audio...")
-        audio = whisperx.load_audio(file_path)
+        audio = model.load_audio(file_path)
         progress.update(1)  # 2
 
         # Transcribe or translate
@@ -40,21 +41,20 @@ def generate_subtitles(
         output = model.transcribe(audio, **options)  # type: ignore
         progress.update(1)  # 3
 
-        # Make sure alignment is valid
-        input_language = str(output.get("language"))
+        # Make sure alignment is possible
+        input_language = output.get("language")
         output_language = language or input_language
         if input_language == output_language:
-            # Align segments/chunks with timestamps
             print("Aligning segments...")
-            model_a, metadata = whisperx.load_align_model(
-                language_code=input_language, device=device
-            )
+
+            align_model, align_metadata = cache.load_align_model(input_language, device)
             aligned = whisperx.align(
-                output["segments"], model_a, metadata, audio, device
+                output["segments"], align_model, align_metadata, audio, device
             )
+
             segments = aligned["segments"]
         else:
-            print("Skip alignment, language mismatch...")
+            print("Skipping alignment, language mismatch...")
             segments = output["segments"]
         progress.update(1)  # 4
 
@@ -65,11 +65,12 @@ def generate_subtitles(
         with open(output_path, "r", encoding="utf-8") as file:
             output_data = file.read()
 
-        print("Done.")
-
         elapsed = (datetime.now() - start).total_seconds()
-        total_time = f"[Finished in {format_to_minutes(elapsed)}]"
+        total_time = (
+            f"Finished in {format_to_minutes(elapsed)}\n[File saved to {output_path}]"
+        )
 
+        print("Done.")
         return total_time, output_data, output_path
 
     except Exception as e:

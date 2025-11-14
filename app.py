@@ -15,6 +15,11 @@ css = """
     text-align: center; 
     display: block
 }
+.choices 
+{
+    justify-content: center;
+    display: flex
+}
 """
 
 with gr.Blocks(theme=gr.themes.Ocean(), css=css, title="Subtitle Generator") as demo:  # type: ignore
@@ -72,12 +77,23 @@ with gr.Blocks(theme=gr.themes.Ocean(), css=css, title="Subtitle Generator") as 
                         value=30,
                     )
 
-            transcribe_button = gr.Button("👉 Transcribe", variant="primary")
+            with gr.Group():
+                mode_selection = gr.Radio(
+                    elem_classes="choices",
+                    choices=[
+                        ("Generate subtitles (.srt)", "generate"),
+                        ("Meeting transcription (with speakers)", "transcribe"),
+                    ],
+                    interactive=True,
+                    show_label=False,
+                    value="generate",
+                )
+                transcribe_button = gr.Button("👉 Generate", variant="primary")
 
             gr.Markdown("### 📝 Results")
             with gr.Group():
                 output_content = gr.TextArea(
-                    label="Subtitles",
+                    show_label=False,
                     interactive=False,
                     show_copy_button=True,
                     visible=True,
@@ -87,7 +103,6 @@ with gr.Blocks(theme=gr.themes.Ocean(), css=css, title="Subtitle Generator") as 
                     value=f"[Engine: {device.upper()}]",
                     elem_classes="status",
                 )
-                output_path = gr.DownloadButton("Download")
 
     # Function to process transcription
     def start_process(
@@ -96,13 +111,14 @@ with gr.Blocks(theme=gr.themes.Ocean(), css=css, title="Subtitle Generator") as 
         language,
         model_name,
         chunk_size,
+        mode,
         progress=gr.Progress(track_tqdm=True),
     ) -> tuple:
         with tqdm(total=5) as pbar:
             try:
                 if not is_valid_multimedia_file(output_dir, file_name):
                     sleep(0.2)
-                    raise ValueError("Please select a valid audio/video file.")
+                    raise ValueError("Please select a valid video or audio file.")
 
                 device = "cuda" if torch.cuda.is_available() else "cpu"
                 settings = {
@@ -112,6 +128,7 @@ with gr.Blocks(theme=gr.themes.Ocean(), css=css, title="Subtitle Generator") as 
                     "model_name": model_name,
                     "device": device,
                     "chunk_size": int(chunk_size),
+                    "mode": mode,
                 }
                 print(settings)
                 pbar.set_description("Processing...")
@@ -143,6 +160,20 @@ with gr.Blocks(theme=gr.themes.Ocean(), css=css, title="Subtitle Generator") as 
         outputs=[file_selected, dir_selected],
     )
 
+    def update_on_mode_selection(mode: str):
+        print(f"Selected mode: {mode}")
+
+        if mode == "transcribe":
+            return "👉 Transcribe"
+        else:
+            return "👉 Generate"
+
+    mode_selection.change(
+        fn=update_on_mode_selection,
+        inputs=[mode_selection],
+        outputs=[transcribe_button],
+    )
+
     transcribe_button.click(
         fn=start_process,
         show_progress_on=output_content,
@@ -152,8 +183,9 @@ with gr.Blocks(theme=gr.themes.Ocean(), css=css, title="Subtitle Generator") as 
             language_dropdown,
             model_dropdown,
             chunk_slider,
+            mode_selection,
         ],
-        outputs=[status, output_content, output_path],
+        outputs=[status, output_content],
     )
 
     transcribe_button.click(
