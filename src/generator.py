@@ -2,7 +2,7 @@ import os
 import whisperx
 import gradio as gr
 from src.model_manager import cache
-from src.utils import format_to_minutes, save_to_srt
+from src.utils import format_to_minutes, save_to_srt, save_to_txt
 from datetime import datetime
 
 
@@ -33,45 +33,56 @@ def generate_subtitles(
 
         # Load audio file
         print("Loading in audio...")
-        audio = model.load_audio(file_path)
+        audio = cache.load_audio(file_path)
         progress.update(1)  # 2
 
         # Transcribe or translate
-        print("Transcribing...")
+        print("Generating...")
         output = model.transcribe(audio, **options)  # type: ignore
         progress.update(1)  # 3
 
+        # Confirm auto-detection worked
+        detected_language = output.get("language")
+        if detected_language is None and language is None:
+            raise ValueError("Language unable to be detected, please select a language")
+
         # Make sure alignment is possible
-        input_language = output.get("language")
+        input_language = str(detected_language or language)
         output_language = language or input_language
         if input_language == output_language:
             print("Aligning segments...")
 
             align_model, align_metadata = cache.load_align_model(input_language, device)
-            aligned = whisperx.align(
+            output = whisperx.align(
                 output["segments"], align_model, align_metadata, audio, device
             )
-
-            segments = aligned["segments"]
         else:
             print("Skipping alignment, language mismatch...")
-            segments = output["segments"]
         progress.update(1)  # 4
 
-        # Save file and read output
-        output_path = save_to_srt(segments, file_name, output_dir)
+        if mode == "generate":
+            output_path = save_to_srt(output["segments"], file_name, output_dir)
+        else:
+            print("Assigning speaker labels...")
+            diarize_model = model.load_diarize(device)
+            diarize_segments = diarize_model(audio)
+            output = whisperx.assign_word_speakers(diarize_segments, output)
+            output_path = save_to_txt(output["segments"], file_name, output_dir)
         progress.update(1)  # 5
 
-        with open(output_path, "r", encoding="utf-8") as file:
-            output_data = file.read()
-
-        elapsed = (datetime.now() - start).total_seconds()
-        total_time = (
-            f"Finished in {format_to_minutes(elapsed)}\n[File saved to {output_path}]"
-        )
-
+        status, output_data = test_and_finalize(output_path, start)
         print("Done.")
-        return total_time, output_data, output_path
+
+        return status, output_data
 
     except Exception as e:
         raise gr.Error(str(e))
+
+
+def test_and_finalize(output_path: str, start: datetime):
+    with open(output_path, "r", encoding="utf-8") as file:
+        output_data = file.read()
+    elapsed = (datetime.now() - start).total_seconds()
+    status = f"Finished in {format_to_minutes(elapsed)}\nOutput saved to {output_path}"
+
+    return status, output_data

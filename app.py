@@ -2,13 +2,14 @@ import os
 import gradio as gr
 import torch
 from tqdm import tqdm
-from src.config import MEDIA_FOLDER
+from src.config import HF_TOKEN, MEDIA_FOLDER
 from src.constants import LANGUAGE_OPTIONS, MODELS
 from src.generator import generate_subtitles
 from src.utils import is_valid_multimedia_file
 from time import sleep
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
+
 css = """
 .status textarea 
 {
@@ -76,15 +77,18 @@ with gr.Blocks(theme=gr.themes.Ocean(), css=css, title="Subtitle Generator") as 
                         label="Chunk size",
                         value=30,
                     )
-
-            with gr.Group():
                 mode_selection = gr.Radio(
                     elem_classes="choices",
                     choices=[
                         ("Generate subtitles (.srt)", "generate"),
-                        ("Meeting transcription (with speakers)", "transcribe"),
+                        (
+                            "Transcribe meeting (with speakers)"
+                            if HF_TOKEN
+                            else "Transcribe meeting (requires token)",
+                            "transcribe",
+                        ),
                     ],
-                    interactive=True,
+                    interactive=HF_TOKEN != "",
                     show_label=False,
                     value="generate",
                 )
@@ -100,7 +104,8 @@ with gr.Blocks(theme=gr.themes.Ocean(), css=css, title="Subtitle Generator") as 
                 )
                 status = gr.Textbox(
                     show_label=False,
-                    value=f"[Engine: {device.upper()}]",
+                    scale=True,
+                    value=f"Engine: {device.upper()}",
                     elem_classes="status",
                 )
 
@@ -133,8 +138,8 @@ with gr.Blocks(theme=gr.themes.Ocean(), css=css, title="Subtitle Generator") as 
                 print(settings)
                 pbar.set_description("Processing...")
 
-                status, content, path = generate_subtitles(progress=pbar, **settings)
-                return status, content, path
+                status, content = generate_subtitles(progress=pbar, **settings)
+                return status, content
 
             except Exception as e:
                 error_msg = f"Error: {str(e)}"
@@ -189,7 +194,7 @@ with gr.Blocks(theme=gr.themes.Ocean(), css=css, title="Subtitle Generator") as 
     )
 
     transcribe_button.click(
-        fn=lambda lang: gr.update(value=f"[Transcribing to language: {lang} ...]"),
+        fn=lambda lang: gr.update(value=f"Transcribing to language: {lang} ..."),
         inputs=[language_dropdown],
         outputs=[status],
     )

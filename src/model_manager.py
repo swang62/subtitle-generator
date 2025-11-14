@@ -1,5 +1,7 @@
 import whisperx
 
+from src.config import HF_TOKEN
+
 
 class ModelCache:
     """Manages loading and caching of WhisperX models."""
@@ -10,12 +12,23 @@ class ModelCache:
         self._current_align_model = None
         self._current_align_metadata = None
         self._current_audio_data = None
+        self._current_diarize_model = None
 
         # Settings
         self._current_model_name = None
         self._current_language_code = None
         self._current_audio_file = None
         self._current_device = None
+        self._current_device_align = None
+        self._current_device_diarize = None
+
+    def load_audio(self, audio_file: str):
+        if self._current_audio_data is None or audio_file != self._current_audio_file:
+            print(f"Loading audio file:{audio_file}")
+            self._current_audio_data = whisperx.load_audio(audio_file)
+            self._current_audio_file = audio_file
+
+        return self._current_audio_data
 
     def load_model(self, model_name: str, device: str):
         if (
@@ -38,24 +51,29 @@ class ModelCache:
         if (
             self._current_align_model is None
             or language_code != self._current_language_code
-            or device != self._current_device
+            or device != self._current_device_align
         ):
             print(f"Loading alignment model:{language_code} on device:{device}")
             self._current_align_model, self._current_align_metadata = (
                 whisperx.load_align_model(language_code=language_code, device=device)
             )
             self._current_language_code = language_code
-            self._current_device = device
+            self._current_device_align = device
 
         return self._current_align_model, self._current_align_metadata
 
-    def load_audio(self, audio_file: str):
-        if self._current_audio_data is None or audio_file != self._current_audio_file:
-            print(f"Loading audio file:{audio_file}")
-            self._current_audio_data = whisperx.load_audio(audio_file)
-            self._current_audio_file = audio_file
+    def load_diarize_model(self, device: str):
+        if (
+            self._current_diarize_model is None
+            or device != self._current_device_diarize
+        ):
+            print(f"Loading diarize model on device:{device}")
+            self._current_diarize_model = whisperx.diarize.DiarizationPipeline(
+                use_auth_token=HF_TOKEN, device=device
+            )  # type: ignore
+            self._current_device_diarize = device
 
-        return self._current_audio_data
+        return self._current_align_model, self._current_align_metadata
 
 
 cache = ModelCache()
