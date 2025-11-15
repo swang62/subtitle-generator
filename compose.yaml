@@ -7,13 +7,15 @@ services:
     image: swang62/subtitle-generator
     environment:
       - MEDIA_FOLDER=/media
+      - HF_TOKEN=${HF_TOKEN}
     ports:
       - 7860:7860
     tty: true
     restart: unless-stopped
     volumes:
       - ${MEDIA_FOLDER}:/media:rw
-      - ./models:/models
+      - ${TORCH_HOME:-./models/torch}:/.cache/torch
+      - ${HF_HOME:-./models/huggingface}:/.cache/huggingface
     deploy:
       resources:
         reservations:

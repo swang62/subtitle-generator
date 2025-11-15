@@ -1,8 +1,8 @@
 import os
 import whisperx
 import gradio as gr
-from src.model_manager import manager
-from src.utils import format_to_minutes, save_to_srt
+from src.model_manager import cache
+from src.utils import save_to_srt, save_to_txt
 from datetime import datetime
 
 
@@ -14,6 +14,7 @@ def generate_subtitles(
     model_name: str,
     device: str,
     chunk_size: int,
+    mode: str,
     progress,
 ):
     start = datetime.now()
@@ -21,56 +22,75 @@ def generate_subtitles(
 
     # Config
     options = {}
-    if language:
+    if language is not None:
         options["language"] = language
     options["chunk_size"] = chunk_size
 
     try:
         # Load whisper model
-        model = manager.load_model(model_name, device)
+        model = cache.load_model(model_name, device)
         progress.update(1)  # 1
 
         # Load audio file
         print("Loading in audio...")
-        audio = whisperx.load_audio(file_path)
+        audio = cache.load_audio(file_path)
         progress.update(1)  # 2
 
         # Transcribe or translate
-        print("Transcribing...")
+        print("Generating...")
         output = model.transcribe(audio, **options)  # type: ignore
         progress.update(1)  # 3
 
-        # Make sure alignment is valid
-        input_language = str(output.get("language"))
+        # Confirm auto-detection worked
+        detected_language = output.get("language")
+        if detected_language is None and language is None:
+            raise ValueError("Language unable to be detected, please select a language")
+
+        # Make sure alignment is possible
+        input_language = str(detected_language or language)
         output_language = language or input_language
         if input_language == output_language:
-            # Align segments/chunks with timestamps
+            align_model, align_metadata = cache.load_align_model(input_language, device)
             print("Aligning segments...")
-            model_a, metadata = whisperx.load_align_model(
-                language_code=input_language, device=device
+            output = whisperx.align(
+                output["segments"], align_model, align_metadata, audio, device
             )
-            aligned = whisperx.align(
-                output["segments"], model_a, metadata, audio, device
-            )
-            segments = aligned["segments"]
         else:
-            print("Skip alignment, language mismatch...")
-            segments = output["segments"]
+            print("Skipping alignment, language mismatch...")
         progress.update(1)  # 4
 
-        # Save file and read output
-        output_path = save_to_srt(segments, file_name, output_dir)
+        if mode == "generate":
+            output_path = save_to_srt(output["segments"], file_name, output_dir)
+        else:
+            # Label speakers for meeting transcribing
+            diarize_model = cache.load_diarize_model(device)
+            print("Assigning speaker labels...")
+            diarize_segments = diarize_model(audio)
+            output = whisperx.assign_word_speakers(diarize_segments, output)
+            output_path = save_to_txt(output["segments"], file_name, output_dir)
         progress.update(1)  # 5
 
+        # Output data
         with open(output_path, "r", encoding="utf-8") as file:
             output_data = file.read()
 
+        # Detect unique speakers
+        unique_speakers = [
+            segment["speaker"] for segment in output["segments"] if "speaker" in segment
+        ]
+        unique_speakers = ",".join(list(set(unique_speakers)))
+
+        # Time elapsed
+        duration = (datetime.now() - start).total_seconds()
+
         print("Done.")
 
-        elapsed = (datetime.now() - start).total_seconds()
-        total_time = f"[Finished in {format_to_minutes(elapsed)}]"
-
-        return total_time, output_data, output_path
+        return {
+            "duration": duration,
+            "output_data": output_data,
+            "output_path": output_path,
+            "unique_speakers": unique_speakers,
+        }
 
     except Exception as e:
         raise gr.Error(str(e))

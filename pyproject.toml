@@ -8,6 +8,7 @@ dependencies = [
   "ffmpeg-python>=0.2.0",
   "gradio>=5.49.1",
   "hf-xet>=1.2.0",
+  "pymediainfo>=7.0.1",
   "python-dotenv>=1.2.1",
   "torch==2.8.0",
   "torchaudio==2.8.0",
