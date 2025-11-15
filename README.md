@@ -18,9 +18,9 @@ You have two options, install locally or use docker (recommended). Installing wi
 
 - ### Setup environment
 
-  1. Get started by first creating an .env file with the command `cp .env.sample .env`.
-  2. Update `MEDIA_FOLDER` to wherever your media is located. This is the only required ENV variable.
-  3. (Optional) If you would like to also transcribe meetings with speaker labels, generate a [huggingface token](https://huggingface.co/settings/tokens) and paste it into `HF_TOKEN`. Accept user agreements for downloading both [segmentation](https://huggingface.co/pyannote/segmentation-3.0) and [diarization](https://huggingface.co/pyannote/speaker-diarization-3.1) models from huggingface. No need to download the actual files.
+  - Get started by first creating an .env file with the command `cp .env.sample .env`.
+  - Update `MEDIA_FOLDER` to wherever your media is located. This is the only required ENV variable.
+  - (Optional) If you would like to also transcribe meetings with speaker labels, generate a [huggingface token](https://huggingface.co/settings/tokens) and paste it into `HF_TOKEN`. Accept user agreements for downloading both [segmentation](https://huggingface.co/pyannote/segmentation-3.0) and [diarization](https://huggingface.co/pyannote/speaker-diarization-3.1) models from huggingface. No need to download the actual files.
 
 - ### (Option 1) Local install
 
@@ -50,7 +50,7 @@ You have two options, install locally or use docker (recommended). Installing wi
 
 Using the GUI (accessible at <http://localhost:7860>) is pretty self-explanatory. Pick a video/audio file to generate subtitles for. The subtitles file will be created in the same folder as the video you picked, with the same filename so all media players and backends like Jellyfin/Emby/Plex will detect it automatically.
 
-When generating meeting transcriptions, the default speaker tags will be SPEAKER_00, SPEAKER_01, etc. Just type in whatever the actual names are, and hit replace. The names will be automatically updated.
+When generating meeting transcriptions, the default speaker tags will be `SPEAKER_00, SPEAKER_01, ...`. Just type in whatever the actual names are, and hit replace. The names will be automatically updated.
 
 > [!TIP]
 > Processing a video for the first time will take significantly longer than usual, since the app needs to download all the models for pytorch/huggingface.
