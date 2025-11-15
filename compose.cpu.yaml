@@ -13,4 +13,5 @@ services:
     restart: unless-stopped
     volumes:
       - ${MEDIA_FOLDER}:/media:rw
-      - ./models:/models
+      - ${TORCH_HOME:-./models/torch}:/.cache/torch
+      - ${HF_HOME:-./models/huggingface}:/.cache/huggingface
