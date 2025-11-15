@@ -82,6 +82,7 @@ def generate_subtitles(
 
         # Time elapsed
         duration = (datetime.now() - start).total_seconds()
+        cache.cleanup(device)
 
         print("Done.")
 

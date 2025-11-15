@@ -1,5 +1,5 @@
+import gc
 import whisperx
-from whisperx.diarize import DiarizationPipeline
 from src.config import HF_TOKEN
 
 
@@ -21,6 +21,13 @@ class ModelCache:
         self._current_device = None
         self._current_device_align = None
         self._current_device_diarize = None
+
+    def cleanup(self, device: str):
+        if device == "cuda":
+            import torch
+
+            torch.cuda.empty_cache()
+        gc.collect()
 
     def load_audio(self, audio_file: str):
         if self._current_audio_data is None or audio_file != self._current_audio_file:
@@ -69,6 +76,8 @@ class ModelCache:
         ):
             print(f"Loading diarize model on device:{device}")
             try:
+                from whisperx.diarize import DiarizationPipeline
+
                 self._current_diarize_model = DiarizationPipeline(
                     model_name="pyannote/speaker-diarization-3.1",
                     use_auth_token=HF_TOKEN,
