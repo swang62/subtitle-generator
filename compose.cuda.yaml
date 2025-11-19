@@ -1,0 +1,12 @@
+services:
+  subtitle-generator:
+    extends:
+      file: compose.yaml
+      service: subtitle-generator
+    image: swang62/subtitle-generator:gpu
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              capabilities: [gpu]

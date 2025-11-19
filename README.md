@@ -39,10 +39,10 @@ You have two options, install locally or use docker (recommended). Installing wi
   Make sure you are using the WSL2 backend if on Windows.
 
   ```bash
-  # GPU-mode (Nvidia CUDA)
-  docker compose up -d
+  # GPU mode (Nvidia CUDA)
+  docker compose -f compose.cuda.yaml up -d
 
-  # OR CPU-only mode
+  # OR CPU mode
   docker compose -f compose.cpu.yaml up -d
   ```
 
