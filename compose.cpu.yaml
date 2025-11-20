@@ -1,17 +1,9 @@
 services:
   subtitle-generator:
-    container_name: subtitle-generator
+    extends:
+      file: compose.yaml
+      service: subtitle-generator
     build:
-      context: .
-      dockerfile: Dockerfile
-    image: swang62/subtitle-generator
-    environment:
-      - MEDIA_FOLDER=/media
-    ports:
-      - 7860:7860
-    tty: true
-    restart: unless-stopped
-    volumes:
-      - ${MEDIA_FOLDER}:/media:rw
-      - ${TORCH_HOME:-./models/torch}:/.cache/torch
-      - ${HF_HOME:-./models/huggingface}:/.cache/huggingface
+      args:
+        BASE_IMAGE: ubuntu:22.04
+    image: swang62/subtitle-generator:cpu

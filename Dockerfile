@@ -1,5 +1,6 @@
 # syntax=docker/dockerfile:1
-FROM nvidia/cuda:12.8.0-runtime-ubuntu22.04 AS base
+ARG BASE_IMAGE=nvidia/cuda:12.8.0-runtime-ubuntu22.04
+FROM ${BASE_IMAGE} AS base
 
 ########################################
 # Build ARG/ENV
@@ -59,13 +60,14 @@ FROM base AS final
 
 ENV GRADIO_SERVER_NAME="0.0.0.0"
 ENV MEDIA_FOLDER="/media"
+ENV DO_NOT_TRACK=1
+ENV GRADIO_ANALYTICS_ENABLED="False"
+ENV DISABLE_TELEMETRY=1
+ENV HF_HUB_DISABLE_TELEMETRY=1
 
 # Copy over app, cache, venv
 COPY --from=build /app .
 COPY --from=build ${VIRTUAL_ENV} ${VIRTUAL_ENV}
-
-# Make sure nvidia is detected
-RUN sed -i '2invidia-smi' /opt/nvidia/nvidia_entrypoint.sh
 
 EXPOSE 7860
 

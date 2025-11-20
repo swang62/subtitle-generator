@@ -16,13 +16,20 @@ dependencies = [
   "whisperx>=3.7.4",
 ]
 
+
 [tool.uv.sources]
-torch = { index = "pytorch" }
-torchvision = { index = "pytorch" }
-torchaudio = { index = "pytorch" }
+torch = [
+  { index = "gpu", marker = "sys_platform != 'darwin' and platform_machine == 'x86_64'" },
+]
+torchvision = [
+  { index = "gpu", marker = "sys_platform != 'darwin' and platform_machine == 'x86_64'" },
+]
+torchaudio = [
+  { index = "gpu", marker = "sys_platform != 'darwin' and platform_machine == 'x86_64'" },
+]
 
 [[tool.uv.index]]
-name = "pytorch"
+name = "gpu"
 url = "https://download.pytorch.org/whl/cu128"
 explicit = true
 
@@ -30,6 +37,4 @@ explicit = true
 target-version = "py313"
 
 [dependency-groups]
-dev = [
-    "pre-commit>=4.4.0",
-]
+dev = ["pre-commit>=4.4.0"]
