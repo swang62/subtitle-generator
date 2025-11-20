@@ -10,7 +10,7 @@ A user-friendly GUI to automatically generate subtitles (or meeting transcriptio
 
 - [CUDA Toolkit 12.8.0](https://developer.nvidia.com/cuda-toolkit-archive) (If using an NVIDIA GPU)
 - For CPU-only mode, at least 8GB of RAM
-- For GPU acceleration, at least 8GB of VRAM, CUDA >= 12.8 (check your GPU stats with nvidia-smi)
+- For GPU acceleration, x86/64 Intel, at least 8GB of VRAM, CUDA >= 12.8 (check your GPU stats with nvidia-smi)
 
 ## Installation and usage
 
