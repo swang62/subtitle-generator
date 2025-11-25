@@ -1,10 +1,12 @@
 from typing import Optional
+from urllib.parse import quote
 
 import click
 import gradio as gr
 import torch
 import uvicorn
 from fastapi import FastAPI, File, Query, UploadFile
+from fastapi.responses import StreamingResponse
 
 from api.engine import asr
 from ui.config import MEDIA_FOLDER
@@ -29,7 +31,7 @@ async def asr_endpoint(
     return_speaker_embeddings: bool = Query(default=True),
     output: Optional[str] = Query(default="txt", enum=["txt", "srt", "json"]),
 ):
-    return await asr(
+    output_file = asr(
         audio_file=audio_file,
         encode=encode,
         language=language,
@@ -37,6 +39,15 @@ async def asr_endpoint(
         diarize=enable_diarization,
         return_speaker_embeddings=return_speaker_embeddings,
         output=output,
+    )
+
+    return StreamingResponse(
+        output_file,
+        media_type="text/plain",
+        headers={
+            "Asr-Engine": "whisperx",
+            "Content-Disposition": f'attachment; filename="{quote(str(audio_file.filename))}.{output}"',
+        },
     )
 
 

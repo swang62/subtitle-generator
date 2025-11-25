@@ -1,11 +1,9 @@
 from io import StringIO
-from typing import Optional
-from urllib.parse import quote
+from typing import Any, Optional
 
 import torch
 import whisperx
 from fastapi import File, Query, UploadFile
-from fastapi.responses import StreamingResponse
 
 from api.utils import load_audio, write_result
 from ui.config import DEFAULT_MODEL
@@ -15,7 +13,7 @@ from ui.model_manager import ModelCache
 DEFAULT_DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 
 
-async def asr(
+def asr(
     audio_file: UploadFile = File(...),
     encode: bool = Query(default=True),
     language: Optional[str] = Query(default=None, enum=list(LANGUAGE_OPTIONS.values())),
@@ -29,9 +27,11 @@ async def asr(
     model = cache.load_model(DEFAULT_MODEL, DEFAULT_DEVICE)
 
     # Config
-    options = {}
+    options: dict[str, Any] = {}
     if language:
         options["language"] = language
+        if language in ["zh", "ja"]:
+            options["chunk_size"] = 10
     if initial_prompt:
         options["initial_prompt"] = initial_prompt
 
@@ -70,16 +70,9 @@ async def asr(
             diarize_segments, result, speaker_embeddings
         )
 
-    result["language"] = input_language
+    # Output data into string stream
     output_file = StringIO()
     write_result(result, output_file, output)
     output_file.seek(0)
 
-    return StreamingResponse(
-        output_file,
-        media_type="text/plain",
-        headers={
-            "Asr-Engine": "whisperx",
-            "Content-Disposition": f'attachment; filename="{quote(str(audio_file.filename))}.{output}"',
-        },
-    )
+    return output_file
