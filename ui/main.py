@@ -260,5 +260,5 @@ with gr.Blocks(theme=gr.themes.Ocean(), css=css, title="Subtitle Generator") as 
         outputs=[detected_speakers],
     )
 
-if "__name__" == "__main__":
+if __name__ == "__main__":
     demo.launch(allowed_paths=[MEDIA_FOLDER])

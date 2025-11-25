@@ -42,5 +42,5 @@ target-version = "py313"
 extend-select = ["I"]
 
 [tool.mypy]
-python_version = "3.14"
+python_version = "3.13"
 ignore_missing_imports = true
