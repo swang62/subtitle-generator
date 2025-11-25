@@ -1,9 +1,11 @@
 import os
-import whisperx
-import gradio as gr
-from src.model_manager import cache
-from src.utils import save_to_srt, save_to_txt
 from datetime import datetime
+
+import gradio as gr
+import whisperx
+
+from ui.model_manager import ModelCache
+from ui.utils import save_to_srt, save_to_txt
 
 
 # Main function to transcribe/translate audio
@@ -27,13 +29,15 @@ def generate_subtitles(
     options["chunk_size"] = chunk_size
 
     try:
+        cache = ModelCache()
+
         # Load whisper model
         model = cache.load_model(model_name, device)
         progress.update(1)  # 1
 
-        # Load audio file
+        # Load audio file (never cached)
         print("Loading in audio...")
-        audio = cache.load_audio(file_path)
+        audio = whisperx.load_audio(file_path)
         progress.update(1)  # 2
 
         # Transcribe or translate
@@ -82,7 +86,6 @@ def generate_subtitles(
 
         # Time elapsed
         duration = (datetime.now() - start).total_seconds()
-        cache.cleanup(device)
 
         print("Done.")
 

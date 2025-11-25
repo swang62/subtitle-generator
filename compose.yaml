@@ -4,13 +4,6 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    develop:
-      watch:
-        - action: rebuild
-          path: ./uv.lock
-        - action: sync+restart
-          path: ./src
-          target: /app/src
     environment:
       - HF_TOKEN=${HF_TOKEN}
     ports:

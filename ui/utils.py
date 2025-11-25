@@ -1,9 +1,9 @@
-import os
 import mimetypes
+import os
 import re
 from typing import Any
 
-from src.constants import SUPPORTED_EXTENSIONS
+from ui.constants import SUPPORTED_EXTENSIONS
 
 
 def is_valid_multimedia_file(output_dir: str, file_name: str):
