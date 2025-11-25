@@ -1,8 +1,8 @@
 services:
-  subtitle-generator:
+  whisperx:
     extends:
       file: compose.yaml
-      service: subtitle-generator
+      service: whisperx
     image: swang62/subtitle-generator:gpu
     deploy:
       resources:

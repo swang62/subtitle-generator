@@ -1,6 +1,6 @@
 services:
-  subtitle-generator:
-    container_name: subtitle-generator
+  whisperx:
+    container_name: whisperx
     build:
       context: .
       dockerfile: Dockerfile

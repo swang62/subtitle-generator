@@ -1,8 +1,8 @@
 services:
-  subtitle-generator:
+  whisperx:
     extends:
       file: compose.yaml
-      service: subtitle-generator
+      service: whisperx
     build:
       args:
         BASE_IMAGE: ubuntu:22.04
