@@ -1,7 +1,8 @@
 # Constants
 
 MODELS = {
-    "base": "default (fast, least accurate)",
+    "base": "default (fastest, least accurate)",
+    "distil-large-v3": "large-distilled (fast, best for en)",
     "large-v3-turbo": "large-turbo (slow, good accuracy)",
     "large-v2": "large-v2 (slowest, most accurate)",
 }

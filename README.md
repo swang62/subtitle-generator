@@ -21,6 +21,7 @@ You have two options, install locally or use docker (recommended). Installing wi
   - Get started by first creating an .env file with the command `cp .env.sample .env`.
   - Update `MEDIA_FOLDER` to wherever your media is located. This is the only required ENV variable.
   - (Optional) If you would like to also transcribe meetings with speaker labels, generate a [huggingface token](https://huggingface.co/settings/tokens) and paste it into `HF_TOKEN`. Accept user agreements for downloading both [segmentation](https://huggingface.co/pyannote/segmentation-3.0) and [diarization](https://huggingface.co/pyannote/speaker-diarization-3.1) models from huggingface. No need to download the actual files.
+  - Update `DEFAULT_MODEL` if you would like to customize the /asr API endpoint.
 
 - ### (Option 1) Local install
 
@@ -50,16 +51,16 @@ You have two options, install locally or use docker (recommended). Installing wi
 
 Using the GUI (accessible at <http://localhost:7860>) is pretty self-explanatory. Pick a video/audio file to generate subtitles for. The subtitles file will be created in the same folder as the video you picked, with the same filename so all media players and backends like Jellyfin/Emby/Plex will detect it automatically.
 
-When generating meeting transcriptions, the default speaker tags will be `SPEAKER_00, SPEAKER_01, ...`. Just type in whatever the actual names are, and hit replace. The names will be automatically updated.
+When generating meeting transcriptions, the default speaker tags will be `SPEAKER_00, SPEAKER_01, ...`. Just type in whatever the actual names are, and hit replace. The names will be automatically updated. If you would like to use a more polished UI, I highly recommend [speakr](https://github.com/murtaza-nasir/speakr). This repo provides a compatible whisper-asr endpoint at `/asr`. When configuring speakr, use `USE_ASR_ENDPOINT=true
+ASR_BASE_URL=http://localhost:7860`. For detailed instructions and troubleshooting, please visit their docs.
 
 > [!TIP]
 > Processing a video for the first time will take significantly longer than usual, since the app needs to download all the models for pytorch/huggingface.
-> Optionally, you can run `python preload-models.py` to download all models beforehand, and to test that everything is working.
 > For docker, if you have already used whisper in the past, or setup the project locally already, you can set both local cache variables(`$TORCH_HOME` and `$HF_HOME`) to mount the models directly into the container to avoid redownloading everything. Search your OS specific details to determine where your local cache files are saved.
 
 ## Development
 
-If you would like to help contribute to this repo, or simply want to customize the code for your own purposes, use the local setup above and make sure your code editor and/or terminal has the virtual environment activated. But instead of running `uv run app.py`, use the command `uv run gradio app.py`. This will enable hot-reloading for easier local development. All changes will be instantly refreshed in the browser. Have fun!
+If you would like to help contribute to this repo, or simply want to customize the code for your own purposes, use the local setup above and make sure your code editor and/or terminal has the virtual environment activated.
 
 > [!NOTE]
 > If you would like to enforce linting and formatting rules while developing, run `pre-commit install` to install git hooks.
@@ -74,6 +75,7 @@ Huge thanks to the following open-source projects. Much inspiration and code sni
 - [WhisperX](https://github.com/m-bain/whisperX)
 - [Kit-WhisperX](https://github.com/rgcodeai/Kit-Whisperx)
 - [docker-whisperX](https://github.com/jim60105/docker-whisperX)
+- [speakr](https://github.com/murtaza-nasir/speakr)
 
 ## LICENSE
 
