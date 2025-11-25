@@ -37,35 +37,25 @@ def format_time_for_srt(duration: float):
     return f"{hours:02}:{minutes:02}:{seconds:02},{milliseconds:03}"
 
 
-def save_to_srt(segments: list[dict[str, Any]], file_name: str, output_dir: str):
-    """Formats and saves SRT with same name as the original video"""
-
-    srt_file_name = re.sub(r"\.\w+$", ".srt", file_name)
+def save_to_file(
+    segments: list[dict[str, Any]], file_name: str, output_dir: str, output_format: str
+):
+    srt_file_name = re.sub(r"\.\w+$", f".{output_format}", file_name)
     file_path = os.path.join(output_dir, srt_file_name)
 
+    print(f"Saving to {file_path}...")
     with open(file_path, "w", encoding="utf-8") as file:
-        print(f"Saving to {file_path}...")
-        for i, segment in enumerate(segments, 1):
-            start = format_time_for_srt(segment["start"])
-            end = format_time_for_srt(segment["end"])
-            text = segment["text"].strip()
-            file.write(f"{i}\n{start} --> {end}\n{text}\n\n")
-
-    return file_path
-
-
-def save_to_txt(segments: list[dict[str, Any]], file_name: str, output_dir: str):
-    """Formats and saves TXT with same name as the original video"""
-
-    srt_file_name = re.sub(r"\.\w+$", ".txt", file_name)
-    file_path = os.path.join(output_dir, srt_file_name)
-
-    with open(file_path, "w", encoding="utf-8") as file:
-        print(f"Saving to {file_path}...")
-        for segment in segments:
-            start = format_time_for_txt(segment["start"])
-            speaker = segment["speaker"].strip()
-            text = segment["text"].strip()
-            file.write(f"[{start}] {speaker}: {text}\n")
+        if output_format == "srt":
+            for i, segment in enumerate(segments, 1):
+                start = format_time_for_srt(segment["start"])
+                end = format_time_for_srt(segment["end"])
+                text = segment["text"].strip()
+                file.write(f"{i}\n{start} --> {end}\n{text}\n\n")
+        else:
+            for segment in segments:
+                start = format_time_for_txt(segment["start"])
+                speaker = segment["speaker"].strip()
+                text = segment["text"].strip()
+                file.write(f"[{start}] {speaker}: {text}\n")
 
     return file_path

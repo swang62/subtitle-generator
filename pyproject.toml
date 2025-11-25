@@ -18,6 +18,8 @@ dependencies = [
   "whisperx>=3.7.4",
 ]
 
+[dependency-groups]
+dev = ["pre-commit>=4.4.0"]
 
 [tool.uv.sources]
 torch = [
@@ -39,5 +41,6 @@ explicit = true
 target-version = "py313"
 extend-select = ["I"]
 
-[dependency-groups]
-dev = ["pre-commit>=4.4.0"]
+[tool.mypy]
+python_version = "3.14"
+ignore_missing_imports = true

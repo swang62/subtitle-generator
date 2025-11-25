@@ -36,12 +36,13 @@ class ModelCache:
 
     def __init__(self):
         self.last_activity_time = time()
+        print(f"timestamp: {self.last_activity_time}")
         pass
 
     def cache_timeout(self):
         while True:
-            sleep(10)
-            if time() - self.last_activity_time > 60:
+            sleep(60)
+            if time() - self.last_activity_time > 3600:
                 with self.model_lock:
                     self.cleanup()
                     break
@@ -59,59 +60,67 @@ class ModelCache:
         print("Model unloaded due to timeout")
 
     def load_model(self, model_name: str, device: str):
-        if (
-            self.model.data is None
-            or model_name != self.config.model_name
-            or device != self.config.device
-        ):
-            print(f"Loading model:{model_name} on device:{device}")
-            compute_type = "float16" if device == "cuda" else "float32"
+        with self.model_lock:
+            if (
+                self.model.data is None
+                or model_name != self.config.model_name
+                or device != self.config.device
+            ):
+                print(f"Loading model:{model_name} on device:{device}")
+                # compute_type = "float16" if device == "cuda" else "float32"
+                compute_type = "float16"
 
-            self.model.data = whisperx.load_model(
-                model_name, device=device, compute_type=compute_type
-            )
-            self.config.model_name = model_name
-            self.config.device = device
+                self.model.data = whisperx.load_model(
+                    model_name,
+                    device=device,
+                    compute_type=compute_type,
+                    asr_options={"without_timestamps": False},
+                )
+                self.config.model_name = model_name
+                self.config.device = device
 
-        Thread(target=self.cache_timeout, daemon=True).start()
+                # Only start idle timer when new model is loaded
+                Thread(target=self.cache_timeout, daemon=True).start()
 
         return self.model.data
 
     def load_align_model(self, language: str, device: str):
-        if (
-            self.model.align is None
-            or language != self.config.language
-            or device != self.config.device_align
-        ):
-            print(f"Loading alignment model:{language} on device:{device}")
-            self.model.align, self.model.align_metadata = whisperx.load_align_model(
-                language_code=language, device=device
-            )
-            self.config.language = language
-            self.config.device_align = device
+        with self.model_lock:
+            if (
+                self.model.align is None
+                or language != self.config.language
+                or device != self.config.device_align
+            ):
+                print(f"Loading alignment model:{language} on device:{device}")
+                self.model.align, self.model.align_metadata = whisperx.load_align_model(
+                    language_code=language, device=device
+                )
+                self.config.language = language
+                self.config.device_align = device
 
         return self.model.align, self.model.align_metadata
 
     def load_diarize_model(self, device: str):
-        if self.model.diarize is None or device != self.config.device_diarize:
-            print(f"Loading diarize model on device:{device}")
-            try:
-                from whisperx.diarize import DiarizationPipeline
+        with self.model_lock:
+            if self.model.diarize is None or device != self.config.device_diarize:
+                print(f"Loading diarize model on device:{device}")
+                try:
+                    from whisperx.diarize import DiarizationPipeline
 
-                self.model.diarize = DiarizationPipeline(
-                    model_name="pyannote/speaker-diarization-3.1",
-                    use_auth_token=HF_TOKEN,
-                    device=device,
-                )
-                self.model.diarize.model.embedding_batch_size = 8
-                self.model.diarize.model.segmentation_batch_size = 8
-                self.config.device_diarize = device
-            except Exception as e:
-                print(str(e))
-                raise RuntimeError(
-                    "Make sure your HF_TOKEN is correct and you've accepted "
-                    "the terms at: https://huggingface.co/pyannote/speaker-diarization-3.1 "
-                    "and https://huggingface.co/pyannote/segmentation-3.0"
-                )
+                    self.model.diarize = DiarizationPipeline(
+                        model_name="pyannote/speaker-diarization-3.1",
+                        use_auth_token=HF_TOKEN,
+                        device=device,
+                    )
+                    self.model.diarize.model.embedding_batch_size = 8
+                    self.model.diarize.model.segmentation_batch_size = 8
+                    self.config.device_diarize = device
+                except Exception as e:
+                    print(str(e))
+                    raise RuntimeError(
+                        "Make sure your HF_TOKEN is correct and you've accepted "
+                        "the terms at: https://huggingface.co/pyannote/speaker-diarization-3.1 "
+                        "and https://huggingface.co/pyannote/segmentation-3.0"
+                    )
 
         return self.model.diarize

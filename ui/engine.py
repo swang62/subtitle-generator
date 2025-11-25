@@ -1,11 +1,12 @@
 import os
 from datetime import datetime
+from typing import Any
 
 import gradio as gr
 import whisperx
 
 from ui.model_manager import ModelCache
-from ui.utils import save_to_srt, save_to_txt
+from ui.utils import save_to_file
 
 
 # Main function to transcribe/translate audio
@@ -23,8 +24,8 @@ def generate_subtitles(
     file_path = os.path.join(output_dir, file_name)
 
     # Config
-    options = {}
-    if language is not None:
+    options: dict[str, Any] = {}
+    if language:
         options["language"] = language
     options["chunk_size"] = chunk_size
 
@@ -42,11 +43,11 @@ def generate_subtitles(
 
         # Transcribe or translate
         print("Generating...")
-        output = model.transcribe(audio, **options)  # type: ignore
+        result = model.transcribe(audio, **options)  # type: ignore
         progress.update(1)  # 3
 
         # Confirm auto-detection worked
-        detected_language = output.get("language")
+        detected_language = result.get("language")
         if detected_language is None and language is None:
             raise ValueError("Language unable to be detected, please select a language")
 
@@ -56,33 +57,34 @@ def generate_subtitles(
         if input_language == output_language:
             align_model, align_metadata = cache.load_align_model(input_language, device)
             print("Aligning segments...")
-            output = whisperx.align(
-                output["segments"], align_model, align_metadata, audio, device
+            result = whisperx.align(
+                result["segments"], align_model, align_metadata, audio, device
             )
         else:
             print("Skipping alignment, language mismatch...")
         progress.update(1)  # 4
 
-        if mode == "generate":
-            output_path = save_to_srt(output["segments"], file_name, output_dir)
-        else:
-            # Label speakers for meeting transcribing
+        # Label speakers for meeting transcritions
+        if mode != "generate":
             diarize_model = cache.load_diarize_model(device)
             print("Assigning speaker labels...")
             diarize_segments = diarize_model(audio)
-            output = whisperx.assign_word_speakers(diarize_segments, output)
-            output_path = save_to_txt(output["segments"], file_name, output_dir)
+            result = whisperx.assign_word_speakers(diarize_segments, result)
         progress.update(1)  # 5
 
         # Output data
+        output_format = "srt" if mode == "generate" else "txt"
+        output_path = save_to_file(
+            result["segments"], file_name, output_dir, output_format
+        )
         with open(output_path, "r", encoding="utf-8") as file:
             output_data = file.read()
 
         # Detect unique speakers
         unique_speakers = [
-            segment["speaker"] for segment in output["segments"] if "speaker" in segment
+            segment["speaker"] for segment in result["segments"] if "speaker" in segment
         ]
-        unique_speakers = ",".join(list(set(unique_speakers)))
+        unique_speakers_str = ",".join(list(set(unique_speakers)))
 
         # Time elapsed
         duration = (datetime.now() - start).total_seconds()
@@ -93,7 +95,7 @@ def generate_subtitles(
             "duration": duration,
             "output_data": output_data,
             "output_path": output_path,
-            "unique_speakers": unique_speakers,
+            "unique_speakers": unique_speakers_str,
         }
 
     except Exception as e:

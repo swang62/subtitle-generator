@@ -6,6 +6,7 @@ services:
       dockerfile: Dockerfile
     environment:
       - HF_TOKEN=${HF_TOKEN}
+      - DEFAULT_MODEL=${DEFAULT_MODEL:-base}
     ports:
       - 7860:7860
     tty: true

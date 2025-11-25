@@ -8,7 +8,7 @@ from tqdm import tqdm
 
 from ui.config import HF_TOKEN, MEDIA_FOLDER
 from ui.constants import LANGUAGE_OPTIONS, MODELS
-from ui.generator import generate_subtitles
+from ui.engine import generate_subtitles
 from ui.utils import format_time_for_txt, is_valid_multimedia_file
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
@@ -66,9 +66,7 @@ with gr.Blocks(theme=gr.themes.Ocean(), css=css, title="Subtitle Generator") as 
             gr.Markdown("### ⚙️ Run")
             with gr.Group():
                 language_dropdown = gr.Dropdown(
-                    choices=list(
-                        zip(LANGUAGE_OPTIONS.keys(), LANGUAGE_OPTIONS.values())
-                    ),
+                    choices=list(LANGUAGE_OPTIONS.items()),  # type: ignore
                     label="Output language",
                     value="en",
                 )

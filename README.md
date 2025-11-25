@@ -59,7 +59,7 @@ When generating meeting transcriptions, the default speaker tags will be `SPEAKE
 
 ## Development
 
-If you would like to help contribute to this repo, or simply want to customize the code for your own purposes, use the local setup above and make sure your code editor and/or terminal has the virtual environment activated. But instead of running `uv run app.py`, use the command `uv run gradio app.py`. This will enable hot-reloading for easier local development. All changes will be instantly refreshed in the browser. Have fun!
+If you would like to help contribute to this repo, or simply want to customize the code for your own purposes, use the local setup above and make sure your code editor and/or terminal has the virtual environment activated.
 
 > [!NOTE]
 > If you would like to enforce linting and formatting rules while developing, run `pre-commit install` to install git hooks.
