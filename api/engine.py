@@ -8,11 +8,11 @@ from fastapi import File, Query, UploadFile
 from fastapi.responses import StreamingResponse
 
 from api.utils import load_audio, write_result
+from ui.config import DEFAULT_MODEL
 from ui.constants import LANGUAGE_OPTIONS
 from ui.model_manager import ModelCache
 
 DEFAULT_DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
-DEFAULT_MODEL = "base"
 
 
 async def asr(

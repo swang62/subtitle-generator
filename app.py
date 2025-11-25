@@ -16,7 +16,6 @@ app = FastAPI(
 )
 
 DEFAULT_DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
-DEFAULT_MODEL = "base"
 
 
 # Backend API
