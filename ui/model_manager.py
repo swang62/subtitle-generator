@@ -52,8 +52,6 @@ class ModelCache:
             import torch
 
             torch.cuda.empty_cache()
-        del self.model, self.config
-
         gc.collect()
         self.model = Model()
         self.config = Config()
