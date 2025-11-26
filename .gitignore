@@ -3,7 +3,7 @@
 .vscode/
 .venv/
 .ruff_cache/
-
+.mypy_cache/
 models/*
 
 # Files
