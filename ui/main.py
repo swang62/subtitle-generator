@@ -6,13 +6,13 @@ import torch
 from pymediainfo import MediaInfo
 from tqdm import tqdm
 
-from ui.config import HF_TOKEN, MEDIA_FOLDER
-from ui.constants import LANGUAGE_OPTIONS, MODELS
+from shared.config import HF_TOKEN, MEDIA_FOLDER
+from shared.constants import LANGUAGE_OPTIONS, MODELS
 from ui.engine import generate_subtitles
 from ui.utils import format_time_for_txt, is_valid_multimedia_file
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
-css = """
+CSS = """
 .status textarea
 {
     text-align: center;
@@ -26,7 +26,7 @@ css = """
 """
 
 
-with gr.Blocks(theme=gr.themes.Ocean(), css=css, title="Subtitle Generator") as demo:  # type: ignore
+with gr.Blocks(title="Subtitle Generator") as demo:
     # Session state
     stored_data = gr.State("")
     stored_path = gr.State("")
@@ -113,7 +113,7 @@ with gr.Blocks(theme=gr.themes.Ocean(), css=css, title="Subtitle Generator") as 
                 output_data = gr.TextArea(
                     label="Output",
                     interactive=False,
-                    show_copy_button=True,
+                    buttons=["copy"],
                     visible=True,
                 )
                 status = gr.Textbox(
@@ -261,4 +261,4 @@ with gr.Blocks(theme=gr.themes.Ocean(), css=css, title="Subtitle Generator") as 
     )
 
 if __name__ == "__main__":
-    demo.launch(allowed_paths=[MEDIA_FOLDER])
+    demo.launch(allowed_paths=[MEDIA_FOLDER], theme=gr.themes.Ocean(), css=CSS)  # type: ignore

@@ -3,7 +3,7 @@ import os
 import re
 from typing import Any
 
-from ui.constants import SUPPORTED_EXTENSIONS
+from shared.constants import SUPPORTED_EXTENSIONS
 
 
 def is_valid_multimedia_file(output_dir: str, file_name: str):

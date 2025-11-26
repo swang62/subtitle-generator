@@ -5,8 +5,10 @@ from typing import Any
 import gradio as gr
 import whisperx
 
-from ui.model_manager import ModelCache
+from shared.model_manager import ModelCache
 from ui.utils import save_to_file
+
+cache = ModelCache()
 
 
 # Main function to transcribe/translate audio
@@ -30,8 +32,6 @@ def generate_subtitles(
     options["chunk_size"] = chunk_size
 
     try:
-        cache = ModelCache()
-
         # Load whisper model
         model = cache.load_model(model_name, device)
         progress.update(1)  # 1
@@ -60,6 +60,7 @@ def generate_subtitles(
             result = whisperx.align(
                 result["segments"], align_model, align_metadata, audio, device
             )
+            del align_model, align_metadata
         else:
             print("Skipping alignment, language mismatch...")
         progress.update(1)  # 4
@@ -70,6 +71,7 @@ def generate_subtitles(
             print("Assigning speaker labels...")
             diarize_segments = diarize_model(audio)
             result = whisperx.assign_word_speakers(diarize_segments, result)
+            del diarize_model, diarize_segments
         progress.update(1)  # 5
 
         # Output data
@@ -88,7 +90,6 @@ def generate_subtitles(
 
         # Time elapsed
         duration = (datetime.now() - start).total_seconds()
-
         print("Done.")
 
         return {

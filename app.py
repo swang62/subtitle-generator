@@ -3,21 +3,18 @@ from urllib.parse import quote
 
 import click
 import gradio as gr
-import torch
 import uvicorn
 from fastapi import FastAPI, File, Query, UploadFile
 from fastapi.responses import StreamingResponse
 
 from api.engine import asr
-from ui.config import MEDIA_FOLDER
-from ui.constants import LANGUAGE_OPTIONS
-from ui.main import demo
+from shared.config import MEDIA_FOLDER
+from shared.constants import LANGUAGE_OPTIONS
+from ui.main import CSS, demo
 
 app = FastAPI(
     title="whisperx-asr", swagger_ui_parameters={"defaultModelsExpandDepth": -1}
 )
-
-DEFAULT_DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 
 
 # Backend API
@@ -57,6 +54,8 @@ app = gr.mount_gradio_app(
     demo,
     path="/",
     allowed_paths=[MEDIA_FOLDER],
+    theme=gr.themes.Ocean(),  # type: ignore
+    css=CSS,
 )
 
 

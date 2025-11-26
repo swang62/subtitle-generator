@@ -1,16 +1,15 @@
 from io import StringIO
 from typing import Any, Optional
 
-import torch
 import whisperx
 from fastapi import File, Query, UploadFile
 
 from api.utils import load_audio, write_result
-from ui.config import DEFAULT_MODEL
-from ui.constants import LANGUAGE_OPTIONS
-from ui.model_manager import ModelCache
+from shared.config import DEFAULT_MODEL
+from shared.constants import DEFAULT_DEVICE, LANGUAGE_OPTIONS
+from shared.model_manager import ModelCache
 
-DEFAULT_DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
+cache = ModelCache()
 
 
 def asr(
@@ -22,8 +21,7 @@ def asr(
     return_speaker_embeddings: bool = Query(default=True),
     output: Optional[str] = Query(default="txt", enum=["txt", "srt", "json"]),
 ):
-    # Load whisper model and reset idle timer (cached)
-    cache = ModelCache()
+    # Load whisper model
     model = cache.load_model(DEFAULT_MODEL, DEFAULT_DEVICE)
 
     # Config
@@ -51,6 +49,7 @@ def asr(
         result = whisperx.align(
             result["segments"], align_model, align_metadata, audio, DEFAULT_DEVICE
         )
+        del align_model, align_metadata
     else:
         print("Skipping alignment, language mismatch...")
 
@@ -69,6 +68,7 @@ def asr(
         result = whisperx.assign_word_speakers(
             diarize_segments, result, speaker_embeddings
         )
+        del diarize_model, diarize_segments
 
     # Output data into string stream
     output_file = StringIO()

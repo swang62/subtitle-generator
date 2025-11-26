@@ -23,13 +23,13 @@ dev = ["pre-commit>=4.4.0"]
 
 [tool.uv.sources]
 torch = [
-  { index = "gpu", marker = "sys_platform != 'darwin' and platform_machine == 'x86_64'" },
+  { index = "gpu", marker = "platform_machine == 'x86_64' or platform_machine == 'AMD64'" },
 ]
 torchvision = [
-  { index = "gpu", marker = "sys_platform != 'darwin' and platform_machine == 'x86_64'" },
+  { index = "gpu", marker = "platform_machine == 'x86_64' or platform_machine == 'AMD64'" },
 ]
 torchaudio = [
-  { index = "gpu", marker = "sys_platform != 'darwin' and platform_machine == 'x86_64'" },
+  { index = "gpu", marker = "platform_machine == 'x86_64' or platform_machine == 'AMD64'" },
 ]
 
 [[tool.uv.index]]

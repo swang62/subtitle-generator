@@ -2,8 +2,8 @@ import faster_whisper
 import torch
 import torchaudio
 
-from ui.config import HF_TOKEN
-from ui.constants import DEFAULT_ALIGN_MODELS_HF, DEFAULT_ALIGN_MODELS_TORCH
+from shared.config import HF_TOKEN
+from shared.constants import DEFAULT_ALIGN_MODELS_HF, DEFAULT_ALIGN_MODELS_TORCH
 
 # Reference
 # https://github.com/m-bain/whisperX/blob/v3.1.1/whisperx/alignment.py#L21

@@ -1,4 +1,7 @@
 # Constants
+import torch
+
+DEFAULT_DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 
 MODELS = {
     "base": "default (fastest, least accurate)",
