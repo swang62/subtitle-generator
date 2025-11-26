@@ -52,9 +52,9 @@ class ModelCache:
             import torch
 
             torch.cuda.empty_cache()
-        gc.collect()
         self.model = Model()
         self.config = Config()
+        gc.collect()
         print("Model unloaded due to timeout")
 
     def load_model(self, model_name: str, device: str):
