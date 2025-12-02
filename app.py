@@ -12,9 +12,7 @@ from shared.config import MEDIA_FOLDER
 from shared.constants import LANGUAGE_OPTIONS
 from ui.main import CSS, demo
 
-app = FastAPI(
-    title="whisperx-asr", swagger_ui_parameters={"defaultModelsExpandDepth": -1}
-)
+app = FastAPI(title="whisperx-asr")
 
 
 # Backend API

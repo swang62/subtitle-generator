@@ -45,14 +45,16 @@ You have two options, install locally or use docker (recommended). Installing wi
 
   # OR CPU mode
   docker compose -f compose.cpu.yaml up -d
+
+  # Add speakr container (check docs to setup .env)
+  docker compose -f compose.speakr.yaml up -d
   ```
 
   Now go relax and make a coffee, come back in 15min :)
 
 Using the GUI (accessible at <http://localhost:7860>) is pretty self-explanatory. Pick a video/audio file to generate subtitles for. The subtitles file will be created in the same folder as the video you picked, with the same filename so all media players and backends like Jellyfin/Emby/Plex will detect it automatically.
 
-When generating meeting transcriptions, the default speaker tags will be `SPEAKER_00, SPEAKER_01, ...`. Just type in whatever the actual names are, and hit replace. The names will be automatically updated. If you would like to use a more polished UI, I highly recommend [speakr](https://github.com/murtaza-nasir/speakr). This repo provides a compatible whisper-asr endpoint at `/asr`. When configuring speakr, use `USE_ASR_ENDPOINT=true
-ASR_BASE_URL=http://localhost:7860`. For detailed instructions and troubleshooting, please visit their docs.
+When generating meeting transcriptions, the default speaker tags will be `SPEAKER_00, SPEAKER_01, ...`. Just type in whatever the actual names are, and hit replace. The names will be automatically updated. If you would like to use a more polished UI, I highly recommend [speakr](https://github.com/murtaza-nasir/speakr). This repo provides a compatible whisper-asr endpoint at `/asr`, and a demo compose stack on how to integrate it with speakr. For detailed instructions and troubleshooting, please visit their docs.
 
 > [!TIP]
 > Processing a video for the first time will take significantly longer than usual, since the app needs to download all the models for pytorch/huggingface.

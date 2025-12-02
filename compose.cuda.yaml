@@ -4,6 +4,8 @@ services:
       file: compose.yaml
       service: whisperx
     image: swang62/subtitle-generator:gpu
+    labels:
+      - wud.watch=false
     deploy:
       resources:
         reservations:
