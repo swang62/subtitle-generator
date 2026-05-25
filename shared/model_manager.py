@@ -42,7 +42,7 @@ class ModelCache:
     def cache_timeout(self):
         while True:
             sleep(60)
-            if time() - ModelCache.last_activity_time > 300:
+            if time() - ModelCache.last_activity_time > 600:
                 with ModelCache.model_lock:
                     self.cleanup()
                     break

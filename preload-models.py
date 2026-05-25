@@ -15,7 +15,7 @@ alignment_languages = ["en"]
 
 for model in models:
     print(f"Loading model:{model}...")
-    model = faster_whisper.WhisperModel(model)
+    _ = faster_whisper.WhisperModel(model)
 
 for language in alignment_languages:
     print(f"Loading alignment:{language}...")
