@@ -4,6 +4,8 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+    env_file:
+      - .env
     environment:
       - HF_TOKEN=${HF_TOKEN}
       - DEFAULT_MODEL=${DEFAULT_MODEL:-base}
