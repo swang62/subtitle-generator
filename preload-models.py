@@ -10,7 +10,7 @@ from shared.constants import DEFAULT_ALIGN_MODELS_HF, DEFAULT_ALIGN_MODELS_TORCH
 
 # See constants.py for available models/languages
 device = "cuda"
-models = ["base", "distil-large-v3", "large-v3-turbo"]
+models = ["base", "large-v3-turbo"]
 alignment_languages = ["en"]
 
 for model in models:
